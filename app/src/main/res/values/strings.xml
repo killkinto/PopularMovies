@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Pop Movies</string>
+
+    <string name="error_message">
+        Ocorreu um erro. Favor tente novamente.
+    </string>
+
+    <string name="action_try_again">Tentar novamente</string>
+
+    <string name="sort_order_most_popular">Most popular</string>
+    <string name="sort_order_top_rated">Top rated</string>
+
+    <string name="error_no_connection">Sem conexão com a internet</string>
+</resources>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="movie"
+            type="br.com.killkinto.popmovies.model.Movie"/>
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp">
+
+        <TextView
+            android:id="@+id/tv_title_original"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@{movie.originalTitle}"
+            android:textAppearance="@android:style/TextAppearance.Large" />
+
+        <ImageView
+            android:id="@+id/iv_poster"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:imageUrl="@{movie.posterPath}"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/tv_title_original"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/tv_release_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{movie.releaseDate}"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:layout_alignTop="@+id/iv_poster"
+            android:layout_toRightOf="@+id/iv_poster"
+            android:layout_toEndOf="@+id/iv_poster"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp" />
+
+        <TextView
+            android:id="@+id/tv_user_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{movie.voteAverage}"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:layout_below="@id/tv_release_date"
+            android:layout_alignLeft="@+id/tv_release_date"
+            android:layout_alignStart="@+id/tv_release_date"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/tv_synopsis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{movie.overview}"
+            android:gravity="start"
+            android:textSize="15sp"
+            android:layout_marginTop="16dp"
+            android:layout_below="@+id/iv_poster" />
+
+    </RelativeLayout>
+</layout>
