@@ -25,6 +25,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+
+        <provider
+            android:authorities="br.com.killkinto.popmovies"
+            android:name="br.com.killkinto.popmovies.data.MovieContentProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

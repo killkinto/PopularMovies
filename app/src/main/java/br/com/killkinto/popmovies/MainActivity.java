@@ -1,7 +1,11 @@
 package br.com.killkinto.popmovies;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,13 +23,18 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
+import br.com.killkinto.popmovies.data.MovieContract;
 import br.com.killkinto.popmovies.model.Movie;
 import br.com.killkinto.popmovies.utils.NetworkUtils;
 import br.com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterListener {
+public class MainActivity extends AppCompatActivity
+        implements MovieAdapter.MovieAdapterListener, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String SORT_ORDER = "sort_order";
+    private static final int MOVIE_LOADER_FAVORITES_ID = 145;
 
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -138,7 +147,63 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return super.onOptionsItemSelected(item);
     }
 
-    //Usar o loader
+    private void showFavoritesCollection() {
+
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, final Bundle args) {
+        if (loaderId == MOVIE_LOADER_FAVORITES_ID) {
+            return loaderFavorites();
+        } else {
+            return null;
+        }
+    }
+
+    private Loader<Cursor> loaderFavorites() {
+        return new AsyncTaskLoader<Cursor>(this) {
+
+            Cursor mMoviesData = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mMoviesData != null) {
+                    deliverResult(mMoviesData);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    return getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                            null, null, null, null);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                    return null;
+                }
+            }
+
+            @Override
+            public void deliverResult(Cursor data) {
+                mMoviesData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //TODO atualizar o Adapter
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.addMovies(null);
+    }
+
+    //TODO Usar o loader
     private class FetchTheMoviedbTask extends AsyncTask<Void, Void, Movie[]> {
 
         private final String TAG = NetworkUtils.class.getSimpleName();
