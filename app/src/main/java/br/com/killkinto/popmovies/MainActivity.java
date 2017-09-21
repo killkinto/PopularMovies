@@ -2,6 +2,7 @@ package br.com.killkinto.popmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -22,26 +23,35 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import br.com.killkinto.popmovies.data.MovieContract;
 import br.com.killkinto.popmovies.model.Movie;
 import br.com.killkinto.popmovies.utils.NetworkUtils;
 import br.com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
+import static br.com.killkinto.popmovies.data.MovieContract.MovieEntry;
+
 public class MainActivity extends AppCompatActivity
-        implements MovieAdapter.MovieAdapterListener, LoaderManager.LoaderCallbacks<Cursor> {
+        implements MovieAdapter.MovieAdapterListener,
+        LoaderManager.LoaderCallbacks<Movie[]> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String POPULAR_SORT_ORDER_RESOURCE = "popular";
+    private static final String TOP_RATED_SORT_ORDER_RESOURCE = "top_rated";
+    private static final String FAVORITES_COLLETIONS = "favorites_colletions";
 
-    private static final String SORT_ORDER = "sort_order";
+    private static final String OPTION_COLLECTION = "option_colletion";
+    private static final String COLLECTION = "colletions";
     private static final int MOVIE_LOADER_FAVORITES_ID = 145;
 
+    private ArrayList<Movie> mMovies;
     private MovieAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private ProgressBar mLoadingIndicatorProgressBar;
     private Button mTryAgainButton;
     private Menu mMainMenu;
-    private String mSortOrder = NetworkUtils.POPULAR_SORT_ORDER_RESOURCE;
+    private String mOptionCollection = POPULAR_SORT_ORDER_RESOURCE;
     private int mPage = 1;
 
     @Override
@@ -49,10 +59,6 @@ public class MainActivity extends AppCompatActivity
         super.setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if(savedInstanceState != null && savedInstanceState.containsKey(SORT_ORDER)) {
-            mSortOrder = savedInstanceState.getString(SORT_ORDER, NetworkUtils.POPULAR_SORT_ORDER_RESOURCE);
-        }
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_movie_poster);
         mLoadingIndicatorProgressBar = (ProgressBar) findViewById(R.id.pb_loading_indicator);
@@ -65,12 +71,27 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        loadMovieData();
+        if(savedInstanceState != null && savedInstanceState.containsKey(COLLECTION)) {
+            mOptionCollection = savedInstanceState.getString(OPTION_COLLECTION, mOptionCollection);
+            mMovies = savedInstanceState.getParcelableArrayList(COLLECTION);
+            mAdapter.swapMovies(mMovies.toArray(new Movie[mMovies.size()]));
+        } else if (!mOptionCollection.equals(FAVORITES_COLLETIONS)) {
+            loadMovieData();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mOptionCollection.equals(FAVORITES_COLLETIONS)) {
+            showFavoritesCollection();
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle bundle) {
-        bundle.putString(SORT_ORDER, mSortOrder);
+        bundle.putParcelableArrayList(COLLECTION, mMovies);
+        bundle.putString(OPTION_COLLECTION, mOptionCollection);
         super.onSaveInstanceState(bundle);
     }
 
@@ -83,6 +104,11 @@ public class MainActivity extends AppCompatActivity
                 showErrorMessage(getString(R.string.error_no_connection));
             }
         }
+    }
+
+    @Override
+    public boolean isFavorite() {
+        return mOptionCollection.equals(FAVORITES_COLLETIONS);
     }
 
     @Override
@@ -112,10 +138,16 @@ public class MainActivity extends AppCompatActivity
         mMainMenu = menu;
         super.getMenuInflater().inflate(R.menu.main, menu);
 
-        if (mSortOrder.equals(NetworkUtils.POPULAR_SORT_ORDER_RESOURCE)) {
-            menu.findItem(R.id.action_sort_order_most_popular).setVisible(false);
-        } else {
-            menu.findItem(R.id.action_sort_order_top_rated).setVisible(false);
+        switch (mOptionCollection) {
+            case POPULAR_SORT_ORDER_RESOURCE:
+                menu.findItem(R.id.action_sort_order_most_popular).setEnabled(false);
+                break;
+            case TOP_RATED_SORT_ORDER_RESOURCE:
+                menu.findItem(R.id.action_sort_order_top_rated).setEnabled(false);
+                break;
+            case FAVORITES_COLLETIONS:
+                menu.findItem(R.id.action_favorite).setEnabled(false);
+                break;
         }
 
         return true;
@@ -125,34 +157,61 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
 
-        loadMovieData();
+        mMovies.clear();
         switch (itemId) {
             case R.id.action_sort_order_most_popular:
                 mAdapter.addMovies(null);
-                mSortOrder = NetworkUtils.POPULAR_SORT_ORDER_RESOURCE;
+                mOptionCollection = POPULAR_SORT_ORDER_RESOURCE;
                 mPage = 1;
                 loadMovieData();
-                item.setVisible(false);
-                mMainMenu.findItem(R.id.action_sort_order_top_rated).setVisible(true);
+                item.setEnabled(false);
+                mMainMenu.findItem(R.id.action_sort_order_top_rated).setEnabled(true);
+                mMainMenu.findItem(R.id.action_favorite).setEnabled(true);
                 return true;
             case R.id.action_sort_order_top_rated:
                 mAdapter.addMovies(null);
-                mSortOrder = NetworkUtils.TOP_RATED_SORT_ORDER_RESOURCE;
+                mOptionCollection = TOP_RATED_SORT_ORDER_RESOURCE;
                 mPage = 1;
                 loadMovieData();
-                item.setVisible(false);
-                mMainMenu.findItem(R.id.action_sort_order_most_popular).setVisible(true);
+                item.setEnabled(false);
+                mMainMenu.findItem(R.id.action_sort_order_most_popular).setEnabled(true);
+                mMainMenu.findItem(R.id.action_favorite).setEnabled(true);
                 return true;
+            case R.id.action_favorite:
+                showFavoritesCollection();
+                mOptionCollection = FAVORITES_COLLETIONS;
+                item.setEnabled(false);
+                mMainMenu.findItem(R.id.action_sort_order_top_rated).setEnabled(true);
+                mMainMenu.findItem(R.id.action_sort_order_most_popular).setEnabled(true);
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void showFavoritesCollection() {
+        Uri uri = MovieEntry.CONTENT_URI;
 
+        Cursor cursor = getContentResolver().query(uri,  new String[]{MovieEntry._ID, MovieEntry.COLUMN_POSTER_PATH}, null, null, null);
+        Movie[] favorites = null;
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()){
+                favorites = new Movie[cursor.getCount()];
+                int i = 0;
+                do {
+                    favorites[i++] = new Movie(cursor.getInt(cursor.getColumnIndex(MovieEntry._ID)), cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH)));
+                } while (cursor.moveToNext());
+                mMovies.addAll(Arrays.asList(favorites));
+            }
+            cursor.close();
+        }
+
+        mAdapter.swapMovies(favorites);
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, final Bundle args) {
+    public Loader<Movie[]> onCreateLoader(int loaderId, final Bundle args) {
         if (loaderId == MOVIE_LOADER_FAVORITES_ID) {
             return loaderFavorites();
         } else {
@@ -160,10 +219,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private Loader<Cursor> loaderFavorites() {
-        return new AsyncTaskLoader<Cursor>(this) {
+    private Loader<Movie[]> loaderFavorites() {
+        return new AsyncTaskLoader<Movie[]>(this) {
 
-            Cursor mMoviesData = null;
+            Movie[] mMoviesData = null;
 
             @Override
             protected void onStartLoading() {
@@ -175,18 +234,36 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public Cursor loadInBackground() {
+            public Movie[] loadInBackground() {
+                Cursor cursor = null;
                 try {
-                    return getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
-                            null, null, null, null);
+                    cursor = getContentResolver().query(MovieEntry.CONTENT_URI,
+                            new String[]{MovieEntry._ID, MovieEntry.COLUMN_POSTER_PATH}, null, null, null);
+
+                    if (cursor != null && cursor.moveToFirst()) {
+                        mMoviesData = new Movie[cursor.getCount()];
+                        Movie m;
+                        int i = 0;
+                        while (cursor.moveToNext()) {
+                            m = new Movie();
+                            m.id = cursor.getInt(cursor.getColumnIndex(MovieEntry._ID));
+                            m.posterPath = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH));
+                            mMoviesData[i++] = m;
+                        }
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                     return null;
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
+                return mMoviesData;
             }
 
             @Override
-            public void deliverResult(Cursor data) {
+            public void deliverResult(Movie[] data) {
                 mMoviesData = data;
                 super.deliverResult(data);
             }
@@ -194,13 +271,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        //TODO atualizar o Adapter
+    public void onLoadFinished(Loader<Movie[]> loader, Movie[] data) {
+        mAdapter.swapMovies(data);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.addMovies(null);
+    public void onLoaderReset(Loader<Movie[]> loader) {
+        mAdapter.swapMovies(null);
     }
 
     //TODO Usar o loader
@@ -216,7 +293,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected Movie[] doInBackground(Void... params) {
-           URL url = NetworkUtils.buildUrl(mSortOrder, mPage);
+           URL url = NetworkUtils.buildUrl(mOptionCollection, mPage);
 
             try {
                 String response = NetworkUtils.getResponseFromHttpUrl(url);
@@ -233,6 +310,10 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(Movie[] movies) {
             mLoadingIndicatorProgressBar.setVisibility(View.GONE);
             if (movies != null && movies.length > 0) {
+                if (mMovies == null) {
+                    mMovies = new ArrayList<>(movies.length);
+                }
+                mMovies.addAll(Arrays.asList(movies));
                 showMovieDataView();
                 mAdapter.addMovies(movies);
             } else {

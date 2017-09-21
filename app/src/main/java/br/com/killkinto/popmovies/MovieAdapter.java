@@ -23,6 +23,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
    interface MovieAdapterListener {
        void loadMovieData();
        void onClick(Movie movie);
+       boolean isFavorite();
     }
 
     public MovieAdapter(MovieAdapterListener movieAdapterListener) {
@@ -39,7 +40,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @Override
     public void onBindViewHolder(MovieAdapterHolder holder, int position) {
         holder.bind(mMovies.get(position));
-        if (position == mMovies.size() - 5) {
+
+        if (!mMovieListener.isFavorite() && position == mMovies.size() - 5) {
             mMovieListener.loadMovieData();
         }
     }
@@ -52,6 +54,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         return mMovies.size();
     }
 
+    public ArrayList<Movie> swapMovies(Movie[] movies) {
+        ArrayList<Movie> temp = mMovies;
+
+        if (movies != null) {
+            mMovies = new ArrayList<>(Arrays.asList(movies));
+            notifyDataSetChanged();
+        } else {
+            mMovies = null;
+        }
+        return temp;
+    }
+
     public void addMovies(Movie[] movies) {
         if (movies == null) {
             mMovies = null;
@@ -60,11 +74,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         } else {
             mMovies.addAll(Arrays.asList(movies));
         }
-        super.notifyDataSetChanged();
-    }
-
-    public ArrayList<Movie> getMovies() {
-        return mMovies;
+        notifyDataSetChanged();
     }
 
     class MovieAdapterHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

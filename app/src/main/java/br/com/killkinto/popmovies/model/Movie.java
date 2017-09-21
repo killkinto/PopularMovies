@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 import br.com.killkinto.popmovies.utils.NetworkUtils;
 
 public class Movie implements Parcelable {
@@ -20,6 +22,11 @@ public class Movie implements Parcelable {
     public String releaseDate;
 
     public Movie(){}
+
+    public Movie(Integer id, String posterPath) {
+        this.id = id;
+        this.posterPath = posterPath;
+    }
 
     public Movie(Parcel in) {
         id = in.readInt();

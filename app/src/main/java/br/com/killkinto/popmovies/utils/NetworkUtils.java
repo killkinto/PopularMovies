@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Scanner;
 
 public final class NetworkUtils {
@@ -25,27 +26,31 @@ public final class NetworkUtils {
     private static int TYPE_NOT_CONNECTED = 0;
 
     private static final String THEMOVIEDB_API_URL = "http://api.themoviedb.org/3/movie/";
-    public static final String POPULAR_SORT_ORDER_RESOURCE = "popular";
-    public static final String TOP_RATED_SORT_ORDER_RESOURCE = "top_rated";
+    private static final String VIDEO_PATH = "videos";
     private static final String API_KEY_PARAM = "api_key";
     private static final String API_KEY = "";
     private static final String LANGUAGE_PARAM = "language";
-    private static final String LANGUAGE_DEFULT = "pt-BR";
+    //private static final String LANGUAGE_DEFULT = "en-US";
     private static final String PAGE_PARAM = "page";
 
     private static final String URL = "http://image.tmdb.org/t/p/w185";
 
+    //Youtube
+    private static final String YOUTUBE_URL = "http://www.youtube.com";
+    private static final String YOUTUBE_WATCH_PATH = "watch";
+    private static final String YOUTUBE_KEY_PARAM = "v";
+
     public static URL buildUrl(String sortOrder, int page) {
         Uri builtUri = Uri.parse(THEMOVIEDB_API_URL + sortOrder).buildUpon()
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE_DEFULT)
+                .appendQueryParameter(LANGUAGE_PARAM, Locale.getDefault().toString().replace('_', '-'))
                 .appendQueryParameter(PAGE_PARAM, String.valueOf(page))
                 .build();
         URL url = null;
         try {
             url = new URL(builtUri.toString());
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         }
 
         Log.v(TAG, "Built URI " + url);
@@ -53,22 +58,30 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildUrlTrailers(String sortOrder, int page) {
-        Uri builtUri = Uri.parse(THEMOVIEDB_API_URL).buildUpon()
+    public static URL buildUrlTrailers(int movieId) {
+       Uri builtUri = Uri.parse(THEMOVIEDB_API_URL).buildUpon()
+                .appendPath(String.valueOf(movieId))
+                .appendPath(VIDEO_PATH)
                 .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .appendQueryParameter(LANGUAGE_PARAM, LANGUAGE_DEFULT)
-                .appendQueryParameter(PAGE_PARAM, String.valueOf(page))
+                .appendQueryParameter(LANGUAGE_PARAM, Locale.getDefault().toString().replace('_', '-'))
                 .build();
         URL url = null;
         try {
             url = new URL(builtUri.toString());
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
         }
 
         Log.v(TAG, "Built URI " + url);
 
         return url;
+    }
+
+    public static Uri buildUrlYoutube(String key) {
+        return Uri.parse(YOUTUBE_URL).buildUpon()
+                .appendPath(YOUTUBE_WATCH_PATH)
+                .appendQueryParameter(YOUTUBE_KEY_PARAM, key)
+                .build();
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {

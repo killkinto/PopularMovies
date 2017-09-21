@@ -3,7 +3,7 @@
     package="br.com.killkinto.popmovies">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -12,24 +12,38 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DetailMovieActivity"
+        <activity
+            android:name=".DetailMovieActivity"
+            android:label="@string/movie_detail"
+            android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".ReviewActivity"
+            android:label="@string/movie_review"
+            android:parentActivityName=".DetailMovieActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DetailMovieActivity"/>
         </activity>
 
         <provider
+            android:name=".data.MovieContentProvider"
             android:authorities="br.com.killkinto.popmovies"
-            android:name="br.com.killkinto.popmovies.data.MovieContentProvider"
             android:exported="false" />
+
     </application>
 
 </manifest>
