@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies;
+package com.killkinto.popmovies;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -29,21 +29,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import br.com.killkinto.popmovies.databinding.ActivityDetailMovieBinding;
-import br.com.killkinto.popmovies.model.Movie;
-import br.com.killkinto.popmovies.model.Trailer;
-import br.com.killkinto.popmovies.utils.NetworkUtils;
-import br.com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
+import com.killkinto.popmovies.databinding.ActivityDetailMovieBinding;
+import com.killkinto.popmovies.model.Movie;
+import com.killkinto.popmovies.model.Trailer;
+import com.killkinto.popmovies.utils.NetworkUtils;
+import com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
-import static br.com.killkinto.popmovies.data.MovieContract.MovieEntry;
+import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 public class DetailMovieActivity extends AppCompatActivity
         implements TrailerAdapter.TrailerAdapterListener, LoaderManager.LoaderCallbacks<List<Trailer>> {
 
     private static final String TAG = DetailMovieActivity.class.getSimpleName();
 
-    public static final String EXTRA_MOVIE = "br.com.killkinto.popmovies.EXTRA_MOVIE";
-    public static final String EXTRA_MOVIE_ID = "br.com.killkinto.popmovies.EXTRA_MOVIE_ID";
+    public static final String EXTRA_MOVIE = "com.killkinto.popmovies.EXTRA_MOVIE";
+    public static final String EXTRA_MOVIE_ID = "com.killkinto.popmovies.EXTRA_MOVIE_ID";
 
     private static final int ID_TRAILER_LOADER = 74;
 

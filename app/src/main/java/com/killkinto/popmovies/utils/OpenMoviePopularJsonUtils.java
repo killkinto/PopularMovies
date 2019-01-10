@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.utils;
+package com.killkinto.popmovies.utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import br.com.killkinto.popmovies.model.Movie;
-import br.com.killkinto.popmovies.model.Trailer;
+import com.killkinto.popmovies.model.Movie;
+import com.killkinto.popmovies.model.Trailer;
 
 
 public final class OpenMoviePopularJsonUtils {

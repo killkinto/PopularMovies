@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.model;
+package com.killkinto.popmovies.model;
 
 import android.databinding.BindingAdapter;
 import android.os.Parcel;
@@ -7,7 +7,7 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
-import br.com.killkinto.popmovies.utils.NetworkUtils;
+import com.killkinto.popmovies.utils.NetworkUtils;
 
 public class Movie implements Parcelable {
 

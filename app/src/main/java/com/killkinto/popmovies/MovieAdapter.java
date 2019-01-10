@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies;
+package com.killkinto.popmovies;
 
 
 import android.content.Context;
@@ -11,8 +11,8 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import br.com.killkinto.popmovies.model.Movie;
-import br.com.killkinto.popmovies.utils.NetworkUtils;
+import com.killkinto.popmovies.model.Movie;
+import com.killkinto.popmovies.utils.NetworkUtils;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterHolder> {
 

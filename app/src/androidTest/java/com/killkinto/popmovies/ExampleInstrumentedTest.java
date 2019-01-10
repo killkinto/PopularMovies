@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies;
+package com.killkinto.popmovies;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

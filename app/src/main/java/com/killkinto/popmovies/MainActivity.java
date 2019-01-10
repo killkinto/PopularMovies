@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies;
+package com.killkinto.popmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -26,11 +26,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import br.com.killkinto.popmovies.model.Movie;
-import br.com.killkinto.popmovies.utils.NetworkUtils;
-import br.com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
+import com.killkinto.popmovies.model.Movie;
+import com.killkinto.popmovies.utils.NetworkUtils;
+import com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
-import static br.com.killkinto.popmovies.data.MovieContract.MovieEntry;
+import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 public class MainActivity extends AppCompatActivity
         implements MovieAdapter.MovieAdapterListener,

@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.model;
+package com.killkinto.popmovies.model;
 
 public class Trailer {
 

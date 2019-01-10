@@ -1,9 +1,9 @@
-package br.com.killkinto.popmovies.data;
+package com.killkinto.popmovies.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import static br.com.killkinto.popmovies.data.MovieContract.MovieEntry;
+import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 public class MovieDbHelper extends SQLiteOpenHelper {
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="br.com.killkinto.popmovies">
+    package="com.killkinto.popmovies">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -41,7 +41,7 @@
 
         <provider
             android:name=".data.MovieContentProvider"
-            android:authorities="br.com.killkinto.popmovies"
+            android:authorities="com.killkinto.popmovies"
             android:exported="false" />
 
     </application>
