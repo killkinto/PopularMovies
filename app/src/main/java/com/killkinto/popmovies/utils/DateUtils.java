@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.utils;
+package com.killkinto.popmovies.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

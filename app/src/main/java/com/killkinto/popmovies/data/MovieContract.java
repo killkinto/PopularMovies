@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.data;
+package com.killkinto.popmovies.data;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 
 public class MovieContract {
 
-    static final String AUTHORITY = "br.com.killkinto.popmovies";
+    static final String AUTHORITY = "com.killkinto.popmovies";
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
     static final String PATH_MOVIES = "movies";
 

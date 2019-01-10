@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.data;
+package com.killkinto.popmovies.data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import static br.com.killkinto.popmovies.data.MovieContract.MovieEntry;
+import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 
 public class MovieContentProvider extends ContentProvider {

@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies.utils;
+package com.killkinto.popmovies.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -28,9 +28,9 @@ public final class NetworkUtils {
     private static final String THEMOVIEDB_API_URL = "http://api.themoviedb.org/3/movie/";
     private static final String VIDEO_PATH = "videos";
     private static final String API_KEY_PARAM = "api_key";
-    private static final String API_KEY = "";
+    private static final String API_KEY = "20b0067bc1655a85d13693138118fdc8";
     private static final String LANGUAGE_PARAM = "language";
-    //private static final String LANGUAGE_DEFULT = "en-US";
+    private static final String LANGUAGE_DEFULT = "en-US";
     private static final String PAGE_PARAM = "page";
 
     private static final String URL = "http://image.tmdb.org/t/p/w185";

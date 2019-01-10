@@ -1,4 +1,4 @@
-package br.com.killkinto.popmovies;
+package com.killkinto.popmovies;
 
 import org.junit.Test;
 
