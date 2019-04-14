@@ -14,7 +14,7 @@
         android:id="@+id/iv_player_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="@drawable/ic_play_arrow_black_24px"
+        app:srcCompat="@drawable/ic_play_arrow_black_24px"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent" />
