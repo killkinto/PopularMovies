@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.transition.TransitionInflater;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
@@ -21,6 +22,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 
 import org.json.JSONException;
@@ -86,7 +90,34 @@ public class DetailMovieActivity extends AppCompatActivity
 
             buttonFavorite();
 
-            getSupportLoaderManager().initLoader(ID_TRAILER_LOADER, bundle, this);
+            LoaderManager.getInstance(this).initLoader(ID_TRAILER_LOADER, bundle, this);
+            //getSupportLoaderManager().initLoader(ID_TRAILER_LOADER, bundle, this);
+
+            getWindow().setSharedElementEnterTransition(TransitionInflater.from(this)
+                .inflateTransition(R.transition.curve));
+
+            animateViewsIn();
+        }
+    }
+
+    private void animateViewsIn() {
+        ViewGroup root = findViewById(R.id.root);
+        int count = root.getChildCount();
+        float offset = 300;
+        Interpolator interpolator = AnimationUtils.loadInterpolator(this, android.R.interpolator.linear_out_slow_in);
+
+        for (int i = 0; i < count; i++) {
+            View view = root.getChildAt(i);
+            view.setVisibility(View.VISIBLE);
+            view.setTranslationY(offset);
+            view.setAlpha(0.85f);
+            view.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setInterpolator(interpolator)
+                    .setDuration(3000)
+                    .start();
+            offset *= 1.5f;
         }
     }
 
@@ -118,6 +149,10 @@ public class DetailMovieActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            supportFinishAfterTransition();
+            return true;
+        }
         if (item.getItemId() ==  R.id.action_reviews) {
             Intent reviewIntent = new Intent(this, ReviewActivity.class);
             reviewIntent.putExtra(EXTRA_MOVIE_ID, mMovie.id);

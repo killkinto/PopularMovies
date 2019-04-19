@@ -22,7 +22,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
    interface MovieAdapterListener {
        void loadMovieData();
-       void onClick(Movie movie);
+       void onClick(Movie movie, ImageView imageView);
        boolean isFavorite();
     }
 
@@ -93,7 +93,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         @Override
         public void onClick(View v) {
-            mMovieListener.onClick(mMovies.get(getAdapterPosition()));
+            mMovieListener.onClick(mMovies.get(getAdapterPosition()), mPosterImageView);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.killkinto.popmovies;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -112,10 +114,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onClick(Movie movie) {
+    public void onClick(Movie movie, ImageView imageView) {
         Intent intent = new Intent(this, DetailMovieActivity.class);
         intent.putExtra(DetailMovieActivity.EXTRA_MOVIE, movie);
-        startActivity(intent);
+        Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this,
+                imageView, imageView.getTransitionName()).toBundle();
+        startActivity(intent, bundle);
     }
 
     public void onTryAgain(View v) {
