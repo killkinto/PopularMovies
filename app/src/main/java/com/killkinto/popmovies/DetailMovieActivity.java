@@ -1,12 +1,16 @@
 package com.killkinto.popmovies;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -26,9 +30,13 @@ import android.widget.Button;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.List;
 
+import com.killkinto.popmovies.data.MovieDatabase;
 import com.killkinto.popmovies.databinding.ActivityDetailMovieBinding;
 import com.killkinto.popmovies.model.Movie;
 import com.killkinto.popmovies.model.Trailer;
@@ -63,21 +71,7 @@ public class DetailMovieActivity extends AppCompatActivity
 
         if (intent != null && intent.hasExtra(EXTRA_MOVIE)) {
             mMovie = intent.getParcelableExtra(EXTRA_MOVIE);
-            //Se for um favorito
-            if (mMovie.id != null) {
-                Uri uri = MovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mMovie.id)).build();
-                Cursor cursor = getContentResolver().query( uri, null, null, null, null);
-                if (cursor!= null && cursor.moveToFirst()) {
-                    mMovie.title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
-                    mMovie.originalTitle = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_ORIGINAL_TITLE));
-                    mMovie.title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
-                    mMovie.releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
-                    mMovie.voteAverage = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_VOTE_AVERAGE));
-                    mMovie.overview = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_OVERVIEW));
-                    mFavorito = true;
-                    cursor.close();
-                }
-            }
+
             ActivityDetailMovieBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_detail_movie);
             binding.setMovie(mMovie);
 
@@ -90,21 +84,24 @@ public class DetailMovieActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //Se for um favorito
+        if (mMovie.id != null) {
+            new FavoriteMovieSync(this, FavoriteMovieSync.Action.QUERY).execute(mMovie.id);
+        }
+    }
+
     private void buttonFavorite() {
         mFavoriteButton = (Button) findViewById(R.id.bt_favorite);
-
-        if (mFavorito) {
-            mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
-        }
-
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Drawable star = mFavoriteButton.getCompoundDrawables()[0];
                 if (mFavorito) {
-                    desmakeAsFavorite(star);
+                    desmakeAsFavorite();
                 } else {
-                    makeAsFavorito(star);
+                    makeAsFavorito();
                 }
             }
         });
@@ -128,9 +125,9 @@ public class DetailMovieActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void makeAsFavorito(@NonNull final Drawable star) {
+    private void makeAsFavorito() {
         if (mMovie != null) {
-            ContentValues cv = new ContentValues();
+            final ContentValues cv = new ContentValues();
             cv.put(MovieEntry._ID, mMovie.id);
             cv.put(MovieEntry.COLUMN_ORIGINAL_TITLE, mMovie.originalTitle);
             cv.put(MovieEntry.COLUMN_TITLE, mMovie.title);
@@ -139,24 +136,12 @@ public class DetailMovieActivity extends AppCompatActivity
             cv.put(MovieEntry.COLUMN_RELEASE_DATE, mMovie.releaseDate);
             cv.put(MovieEntry.COLUMN_VOTE_AVERAGE, mMovie.voteAverage);
 
-            Uri uri = getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
-
-            if (uri != null) {
-
-                star.setColorFilter(ContextCompat.getColor(this, R.color.colorYellow), PorterDuff.Mode.SRC_IN);
-                mFavorito = true;
-            }
+            new FavoriteMovieSync(this, FavoriteMovieSync.Action.INSERT).execute(cv);
         }
     }
 
-    private void desmakeAsFavorite(@NonNull final Drawable star) {
-        Uri uri = MovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mMovie.id)).build();
-        int rows = getContentResolver().delete(uri, null, null);
-
-        if (rows > 0) {
-            star.setColorFilter(ContextCompat.getColor(this, R.color.colorWhite), PorterDuff.Mode.SRC_IN);
-            mFavorito = false;
-        }
+    private void desmakeAsFavorite() {
+        new FavoriteMovieSync(this, FavoriteMovieSync.Action.DELETE).execute(mMovie.id);
     }
 
     @Override
@@ -217,5 +202,70 @@ public class DetailMovieActivity extends AppCompatActivity
     @Override
     public void onLoaderReset(Loader<List<Trailer>> loader) {
         mTrailerAdapter.swapTrailers(null);
+    }
+
+    private static class FavoriteMovieSync extends AsyncTask<Object,Void,Object> {
+
+        private WeakReference<DetailMovieActivity> mContext;
+        private int mAction;
+
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({Action.QUERY, Action.INSERT, Action.DELETE})
+        @interface Action {
+            int QUERY = 0, INSERT = 1, DELETE = 2;
+        }
+
+        FavoriteMovieSync(DetailMovieActivity context, @Action int action) {
+            mContext = new WeakReference<>(context);
+            mAction = action;
+        }
+
+        @Override
+        protected Object doInBackground(Object... params) {
+            switch (mAction) {
+                case Action.QUERY:
+                    Uri uri = MovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(params[0])).build();
+                    return mContext.get().getContentResolver().query( uri, null, null, null, null);
+                case Action.INSERT:
+                    return mContext.get().getContentResolver().insert(MovieEntry.CONTENT_URI, ((ContentValues) params[0]));
+                case Action.DELETE:
+                    uri = MovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(params[0])).build();
+                    return mContext.get().getContentResolver().delete(uri, null, null);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object obj) {
+            super.onPostExecute(obj);
+            switch (mAction) {
+                case Action.QUERY:
+                    if (obj instanceof Cursor && ((Cursor) obj).moveToFirst()) {
+                        /*mMovie.title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
+                        mMovie.originalTitle = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_ORIGINAL_TITLE));
+                        mMovie.title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_TITLE));
+                        mMovie.releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+                        mMovie.voteAverage = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_VOTE_AVERAGE));
+                        mMovie.overview = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_OVERVIEW));*/
+                        mContext.get().mFavorito = true;
+                        mContext.get().mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
+                        ((Cursor) obj).close();
+                    }
+                    break;
+                case Action.INSERT:
+                    if (obj instanceof Uri) {
+                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorYellow), PorterDuff.Mode.SRC_IN);
+                        mContext.get().mFavorito = true;
+                    }
+                    break;
+                case Action.DELETE:
+                    if (obj instanceof Integer && ((Integer) obj) > 0) {
+                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                        mContext.get().mFavorito = false;
+                    }
+            }
+        }
     }
 }
