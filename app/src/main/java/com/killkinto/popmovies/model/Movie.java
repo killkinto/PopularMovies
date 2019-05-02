@@ -1,33 +1,47 @@
 package com.killkinto.popmovies.model;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.databinding.BindingAdapter;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
-import java.util.ArrayList;
-
+import com.killkinto.popmovies.data.MovieContract;
 import com.killkinto.popmovies.utils.NetworkUtils;
 
+@Entity
 public class Movie implements Parcelable {
 
+    @PrimaryKey
+    @ColumnInfo(name = MovieContract.MovieEntry._ID)
     public Integer id;
 
+    @ColumnInfo(name = MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE)
     public String originalTitle;
     public String title;
 
+    @ColumnInfo(name = MovieContract.MovieEntry.COLUMN_POSTER_PATH)
     public String posterPath;
+    @Ignore
     public String overview;
+    @Ignore
     public String voteAverage;
+    @ColumnInfo(name = MovieContract.MovieEntry.COLUMN_RELEASE_DATE)
     public String releaseDate;
 
     public Movie(){}
 
-    public Movie(Integer id, String posterPath) {
+    @Ignore
+    public Movie(@NonNull Integer id, String posterPath) {
         this.id = id;
         this.posterPath = posterPath;
     }
 
+    @Ignore
     public Movie(Parcel in) {
         id = in.readInt();
         originalTitle = in.readString();

@@ -1,5 +1,6 @@
 package com.killkinto.popmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         if (mOptionCollection.equals(FAVORITES_COLLETIONS)) {
-            showFavoritesCollection();
+            new LoadFavoritesCollection(this).execute();
         }
     }
 
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity
                 mMainMenu.findItem(R.id.action_favorite).setEnabled(true);
                 return true;
             case R.id.action_favorite:
-                showFavoritesCollection();
+                new LoadFavoritesCollection(this).execute();
                 mOptionCollection = FAVORITES_COLLETIONS;
                 item.setEnabled(false);
                 mMainMenu.findItem(R.id.action_sort_order_top_rated).setEnabled(true);
@@ -187,27 +189,6 @@ public class MainActivity extends AppCompatActivity
 
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void showFavoritesCollection() {
-        Uri uri = MovieEntry.CONTENT_URI;
-
-        Cursor cursor = getContentResolver().query(uri,  new String[]{MovieEntry._ID, MovieEntry.COLUMN_POSTER_PATH}, null, null, null);
-        Movie[] favorites = null;
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()){
-                favorites = new Movie[cursor.getCount()];
-                int i = 0;
-                do {
-                    favorites[i++] = new Movie(cursor.getInt(cursor.getColumnIndex(MovieEntry._ID)), cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH)));
-                } while (cursor.moveToNext());
-                mMovies.addAll(Arrays.asList(favorites));
-            }
-            cursor.close();
-        }
-
-        mAdapter.swapMovies(favorites);
     }
 
     @Override
@@ -319,6 +300,42 @@ public class MainActivity extends AppCompatActivity
             } else {
                 showErrorMessage(getString(R.string.error_message));
             }
+        }
+    }
+
+    private static class LoadFavoritesCollection extends AsyncTask<Void,Void,Cursor> {
+
+        private WeakReference<MainActivity> mContext;
+
+        LoadFavoritesCollection(MainActivity context) {
+            mContext = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Cursor doInBackground(Void... voids) {
+            Uri uri = MovieEntry.CONTENT_URI;
+            return mContext.get().getContentResolver().query(uri,  new String[]{MovieEntry._ID, MovieEntry.COLUMN_POSTER_PATH}, null, null, null);
+        }
+
+        @Override
+        protected void onPostExecute(Cursor cursor) {
+            super.onPostExecute(cursor);
+            Movie[] favorites = null;
+
+            if (cursor != null) {
+                if (cursor.moveToFirst()){
+                    favorites = new Movie[cursor.getCount()];
+                    int i = 0;
+                    do {
+                        favorites[i++] = new Movie(cursor.getInt(cursor.getColumnIndex(MovieEntry._ID)),
+                                cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER_PATH)));
+                    } while (cursor.moveToNext());
+                    mContext.get().mMovies.addAll(Arrays.asList(favorites));
+                }
+                cursor.close();
+            }
+
+            mContext.get().mAdapter.swapMovies(favorites);
         }
     }
 }

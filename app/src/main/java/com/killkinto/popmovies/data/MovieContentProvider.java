@@ -10,13 +10,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.killkinto.popmovies.model.Movie;
+
 import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 
 public class MovieContentProvider extends ContentProvider {
-
-    private MovieDbHelper mMovieDbHelper;
-
     public static final int MOVIES = 100;
     public static final int MOVIES_WITH_ID = 101;
 
@@ -33,19 +33,25 @@ public class MovieContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mMovieDbHelper = new MovieDbHelper(getContext());
         return true;
     }
 
     @Nullable
     @Override
-    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
-
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues cv) {
         Uri returnInsert = null;
 
-        if (MovieContentProvider.sUriMATCHER.match(uri) == MovieContentProvider.MOVIES) {
-            long id = db.insert(MovieEntry.TABLE_NAME, null, values);
+        if (cv != null && MovieContentProvider.sUriMATCHER.match(uri) == MovieContentProvider.MOVIES) {
+            Movie movie = new Movie();
+            movie.id = cv.getAsInteger(MovieEntry._ID);
+            movie.originalTitle = cv.getAsString(MovieEntry.COLUMN_ORIGINAL_TITLE);
+            movie.title = cv.getAsString(MovieEntry.COLUMN_TITLE);
+            movie.posterPath = cv.getAsString(MovieEntry.COLUMN_POSTER_PATH);
+            movie.overview = cv.getAsString(MovieEntry.COLUMN_OVERVIEW);
+            movie.releaseDate = cv.getAsString(MovieEntry.COLUMN_RELEASE_DATE);
+            movie.voteAverage = cv.getAsString(MovieEntry.COLUMN_VOTE_AVERAGE);
+            long id = MovieDatabase.getInstance(getContext()).getMovieDao().insert(movie);
+
             if (id > 0) {
                 returnInsert = ContentUris.withAppendedId(MovieEntry.CONTENT_URI, id);
             }
@@ -64,17 +70,14 @@ public class MovieContentProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection,
                         @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-        final SQLiteDatabase db = mMovieDbHelper.getReadableDatabase();
-
         Cursor cursor;
 
         int matcher = MovieContentProvider.sUriMATCHER.match(uri);
 
         if (matcher == MOVIES) {
-            cursor = db.query(MovieEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+            cursor = MovieDatabase.getInstance(getContext()).getMovieDao().getFavoriteMovies();
         } else if (matcher == MOVIES_WITH_ID) {
-            cursor = db.query(MovieEntry.TABLE_NAME, projection, MovieEntry._ID  + "=?" ,
-                    new String[]{uri.getPathSegments().get(1)}, null, null, sortOrder);
+            cursor = MovieDatabase.getInstance(getContext()).getMovieDao().getMovie(Integer.parseInt(uri.getPathSegments().get(1)));
         } else {
             throw new UnsupportedOperationException("Uri desconhecida: " + uri);
         }
@@ -94,13 +97,11 @@ public class MovieContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
-
         int rowsDeletes;
 
         if (MovieContentProvider.sUriMATCHER.match(uri) == MOVIES_WITH_ID) {
-            String id = uri.getPathSegments().get(1);
-            rowsDeletes = db.delete(MovieEntry.TABLE_NAME, MovieEntry._ID + " = ?", new String[]{id});
+            int id = Integer.parseInt(uri.getPathSegments().get(1));
+            rowsDeletes = MovieDatabase.getInstance(getContext()).getMovieDao().delete(new Movie(id, null));
         } else {
             throw new UnsupportedOperationException("URI desconhecida: " + uri);
         }
