@@ -7,4 +7,28 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    
+    <style name="ActivityTheme.Primary.Base.Light" parent="Theme.AppCompat.NoActionBar">
+        <item name="primaryTextColor">@color/primaryTextColor</item>
+        <item name="secondaryTextColor">@color/secondaryTextColor</item>
+        <item name="backgroundCardColor">@color/backgroundCardColor</item>
+        <item name="dividerColor">@color/dividerColor</item>
+        <!--item name="iconPlaceholder">@drawable/i_light_plholder</item-->
+    </style>
+
+    <style name="ActivityTheme.Primary.Base.Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="primaryTextColor">@color/primaryTextColorDark</item>
+        <item name="secondaryTextColor">@color/secondaryTextColorDark</item>
+        <item name="backgroundCardColor">@color/backgroundCardColorDark</item>
+        <item name="dividerColor">@color/dividerColorDark</item>
+        <!--item name="iconPlaceholder">@drawable/i_light_plholder</item-->
+    </style>
+    
+    <style name="FeedActivityThemeLight" parent="ActivityTheme.Primary.Base.Light">
+        <item name="android:windowBackground">@color/windowBackground</item>
+    </style>
+
+    <style name="FeedActivityThemeDark" parent="ActivityTheme.Primary.Base.Light">
+        <item name="android:windowBackground">@color/windowBackgroundDark</item>
+    </style>
 </resources>

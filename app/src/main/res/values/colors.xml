@@ -5,4 +5,17 @@
     <color name="colorAccent">#009688</color>
     <color name="colorWhite">@android:color/white</color>
     <color name="colorYellow">#ffff00</color>
+
+    <color name="primaryTextColor">@android:color/primary_text_light</color>
+    <color name="secondaryTextColor">@android:color/secondary_text_light</color>
+    <color name="backgroundCardColor">#FFFF</color>
+    <color name="dividerColor">#F2F2F3</color>
+    <color name="windowBackground">#F4F4F6</color>
+
+    <color name="primaryTextColorDark">#33343B</color>
+    <color name="secondaryTextColorDark">#8033343B</color>
+    <color name="backgroundCardColorDark">#28292e</color>
+    <color name="dividerColorDark">#F2F2F3</color>
+    <color name="windowBackgroundDark">#33343B</color>
+
 </resources>

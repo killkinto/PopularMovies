@@ -18,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -65,6 +66,9 @@ public class DetailMovieActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+            setTheme(R.style.FeedActivityThemeDark);
+        }
         setContentView(R.layout.activity_detail_movie);
 
         Intent intent = getIntent();
@@ -138,10 +142,14 @@ public class DetailMovieActivity extends AppCompatActivity
 
             new FavoriteMovieSync(this, FavoriteMovieSync.Action.INSERT).execute(cv);
         }
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        recreate();
     }
 
     private void desmakeAsFavorite() {
         new FavoriteMovieSync(this, FavoriteMovieSync.Action.DELETE).execute(mMovie.id);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        recreate();
     }
 
     @Override
