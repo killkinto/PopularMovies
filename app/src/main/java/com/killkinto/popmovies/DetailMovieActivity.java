@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.transition.Slide;
 import android.transition.TransitionInflater;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -19,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -96,8 +98,19 @@ public class DetailMovieActivity extends AppCompatActivity
             getWindow().setSharedElementEnterTransition(TransitionInflater.from(this)
                 .inflateTransition(R.transition.curve));
 
-            animateViewsIn();
+            //animateViewsIn();
+            animateSlideEnter();
         }
+    }
+
+    private void animateSlideEnter() {
+        Slide slide = new Slide(Gravity.BOTTOM);
+        slide.addTarget(R.id.tv_synopsis);
+        slide.addTarget(R.id.rv_trailers);
+        slide.setInterpolator(AnimationUtils.loadInterpolator(this,
+                android.R.interpolator.linear_out_slow_in));
+        slide.setDuration(600);
+        getWindow().setEnterTransition(slide);
     }
 
     private void animateViewsIn() {
