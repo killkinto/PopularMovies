@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -58,6 +59,9 @@ public class DetailMovieActivity extends AppCompatActivity
     private RecyclerView mTrailerRecyclerView;
     private TrailerAdapter mTrailerAdapter;
     private Button mFavoriteButton;
+    private AnimatedVectorDrawable mEmptyStar;
+    private AnimatedVectorDrawable mFillStar;
+
     private boolean mFavorito;
 
     @Override
@@ -136,6 +140,8 @@ public class DetailMovieActivity extends AppCompatActivity
 
     private void buttonFavorite() {
         mFavoriteButton = (Button) findViewById(R.id.bt_favorite);
+        mEmptyStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_empty);
+        mFillStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_fill);
 
         if (mFavorito) {
             mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
@@ -152,6 +158,13 @@ public class DetailMovieActivity extends AppCompatActivity
                 }
             }
         });
+    }
+
+    private void animateStarFavorite() {
+        AnimatedVectorDrawable drawable = mFavorito ? mEmptyStar : mFillStar;
+        mFavoriteButton.getCompoundDrawables()[0] = drawable;
+        drawable.start();
+        mFavorito = !mFavorito;
     }
 
     @Override
@@ -190,9 +203,8 @@ public class DetailMovieActivity extends AppCompatActivity
             Uri uri = getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
 
             if (uri != null) {
-
-                star.setColorFilter(ContextCompat.getColor(this, R.color.colorYellow), PorterDuff.Mode.SRC_IN);
-                mFavorito = true;
+                //star.setColorFilter(ContextCompat.getColor(this, R.color.colorYellow), PorterDuff.Mode.SRC_IN);
+                animateStarFavorite();
             }
         }
     }
@@ -202,8 +214,8 @@ public class DetailMovieActivity extends AppCompatActivity
         int rows = getContentResolver().delete(uri, null, null);
 
         if (rows > 0) {
-            star.setColorFilter(ContextCompat.getColor(this, R.color.colorWhite), PorterDuff.Mode.SRC_IN);
-            mFavorito = false;
+            //star.setColorFilter(ContextCompat.getColor(this, R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+            animateStarFavorite();
         }
     }
 
