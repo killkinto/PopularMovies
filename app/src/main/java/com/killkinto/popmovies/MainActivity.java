@@ -36,6 +36,8 @@ import com.killkinto.popmovies.model.Movie;
 import com.killkinto.popmovies.utils.NetworkUtils;
 import com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
+import timber.log.Timber;
+
 import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 public class MainActivity extends AppCompatActivity
@@ -300,7 +302,7 @@ public class MainActivity extends AppCompatActivity
                 ++mPage;
                 return movies;
             } catch (IOException | JSONException | OpenMoviePopularJsonUtils.OpenMoviePopularJSonException e) {
-                Log.e(TAG, e.getMessage());
+                Timber.e(e);
             }
             return null;
         }

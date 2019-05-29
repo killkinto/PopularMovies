@@ -75,7 +75,7 @@ public class MovieContentProvider extends ContentProvider {
         int matcher = MovieContentProvider.sUriMATCHER.match(uri);
 
         if (matcher == MOVIES) {
-            cursor = MovieDatabase.getInstance(getContext()).getMovieDao().getFavoriteMovies();
+            cursor = MovieDatabase.getInstance(getContext()).getMovieDao().                                                                                           getFavoriteMovies();
         } else if (matcher == MOVIES_WITH_ID) {
             cursor = MovieDatabase.getInstance(getContext()).getMovieDao().getMovie(Integer.parseInt(uri.getPathSegments().get(1)));
         } else {

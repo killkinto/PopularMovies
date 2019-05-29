@@ -44,6 +44,8 @@ import com.killkinto.popmovies.model.Trailer;
 import com.killkinto.popmovies.utils.NetworkUtils;
 import com.killkinto.popmovies.utils.OpenMoviePopularJsonUtils;
 
+import timber.log.Timber;
+
 import static com.killkinto.popmovies.data.MovieContract.MovieEntry;
 
 public class DetailMovieActivity extends AppCompatActivity
