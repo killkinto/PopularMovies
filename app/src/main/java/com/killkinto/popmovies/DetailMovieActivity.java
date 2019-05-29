@@ -96,8 +96,8 @@ public class DetailMovieActivity extends AppCompatActivity
             getWindow().setSharedElementEnterTransition(TransitionInflater.from(this)
                 .inflateTransition(R.transition.curve));
 
-            //animateViewsIn();
-            animateSlideEnter();
+            animateViewsIn();
+            //animateSlideEnter();
         }
     }
 
