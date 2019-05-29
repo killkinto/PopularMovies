@@ -1,23 +1,18 @@
 package com.killkinto.popmovies;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
+import android.support.v7.widget.AppCompatImageView;
 import android.transition.Slide;
 import android.transition.TransitionInflater;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -43,7 +38,6 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.List;
 
-import com.killkinto.popmovies.data.MovieDatabase;
 import com.killkinto.popmovies.databinding.ActivityDetailMovieBinding;
 import com.killkinto.popmovies.model.Movie;
 import com.killkinto.popmovies.model.Trailer;
@@ -66,7 +60,7 @@ public class DetailMovieActivity extends AppCompatActivity
 
     private RecyclerView mTrailerRecyclerView;
     private TrailerAdapter mTrailerAdapter;
-    private Button mFavoriteButton;
+    private AppCompatImageView mFavoriteButton;
     private AnimatedVectorDrawable mEmptyStar;
     private AnimatedVectorDrawable mFillStar;
 
@@ -142,13 +136,9 @@ public class DetailMovieActivity extends AppCompatActivity
     }
 
     private void buttonFavorite() {
-        mFavoriteButton = (Button) findViewById(R.id.bt_favorite);
+        mFavoriteButton = findViewById(R.id.img_favorite);
         mEmptyStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_empty);
         mFillStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_fill);
-
-        if (mFavorito) {
-            mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
-        }
 
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +154,7 @@ public class DetailMovieActivity extends AppCompatActivity
 
     private void animateStarFavorite() {
         AnimatedVectorDrawable drawable = mFavorito ? mEmptyStar : mFillStar;
-        mFavoriteButton.getCompoundDrawables()[0] = drawable;
+        mFavoriteButton.setImageDrawable(drawable);
         drawable.start();
         mFavorito = !mFavorito;
     }
@@ -313,23 +303,24 @@ public class DetailMovieActivity extends AppCompatActivity
                         mMovie.releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
                         mMovie.voteAverage = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_VOTE_AVERAGE));
                         mMovie.overview = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_OVERVIEW));*/
-                        mContext.get().mFavorito = true;
-                        mContext.get().mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
+                        mContext.get().animateStarFavorite();
+                        //mContext.get().mFavorito = true;
+                        //mContext.get().mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
                         ((Cursor) obj).close();
                     }
                     break;
                 case Action.INSERT:
                     if (obj instanceof Uri) {
-                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
-                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorYellow), PorterDuff.Mode.SRC_IN);
-                        mContext.get().mFavorito = true;
+                        //mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                          //      .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorYellow), PorterDuff.Mode.SRC_IN);
+                        mContext.get().animateStarFavorite();
                     }
                     break;
                 case Action.DELETE:
                     if (obj instanceof Integer && ((Integer) obj) > 0) {
-                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
-                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorWhite), PorterDuff.Mode.SRC_IN);
-                        mContext.get().mFavorito = false;
+                        //mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                          //      .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                        mContext.get().animateStarFavorite();
                     }
             }
         }

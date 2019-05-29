@@ -1,7 +1,6 @@
 package com.killkinto.popmovies;
 
 import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
