@@ -1,6 +1,6 @@
 package com.killkinto.popmovies;
 
-import android.content.Context;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,11 +12,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -80,6 +84,17 @@ public class MainActivity extends AppCompatActivity
         } else if (!mOptionCollection.equals(FAVORITES_COLLETIONS)) {
             loadMovieData();
         }
+
+        animateSlideEnter();
+    }
+
+    private void animateSlideEnter() {
+        Slide slide = new Slide(Gravity.TOP);
+        slide.addTarget(R.id.rv_movie_poster);
+        slide.setInterpolator(AnimationUtils.loadInterpolator(this,
+                android.R.interpolator.linear_out_slow_in));
+        slide.setDuration(2000);
+        getWindow().setReenterTransition(slide);
     }
 
     @Override
@@ -114,10 +129,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onClick(Movie movie) {
+    public void onClick(Movie movie, ImageView imageView) {
         Intent intent = new Intent(this, DetailMovieActivity.class);
         intent.putExtra(DetailMovieActivity.EXTRA_MOVIE, movie);
-        startActivity(intent);
+        Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this,
+                imageView, imageView.getTransitionName())
+                .toBundle();
+        startActivity(intent, bundle);
     }
 
     public void onTryAgain(View v) {

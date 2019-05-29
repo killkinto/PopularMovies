@@ -1,20 +1,18 @@
 package com.killkinto.popmovies;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
+import android.support.v7.widget.AppCompatImageView;
+import android.transition.Slide;
+import android.transition.TransitionInflater;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +20,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 
 import org.json.JSONException;
@@ -36,7 +38,6 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.List;
 
-import com.killkinto.popmovies.data.MovieDatabase;
 import com.killkinto.popmovies.databinding.ActivityDetailMovieBinding;
 import com.killkinto.popmovies.model.Movie;
 import com.killkinto.popmovies.model.Trailer;
@@ -59,7 +60,10 @@ public class DetailMovieActivity extends AppCompatActivity
 
     private RecyclerView mTrailerRecyclerView;
     private TrailerAdapter mTrailerAdapter;
-    private Button mFavoriteButton;
+    private AppCompatImageView mFavoriteButton;
+    private AnimatedVectorDrawable mEmptyStar;
+    private AnimatedVectorDrawable mFillStar;
+
     private boolean mFavorito;
 
     @Override
@@ -80,7 +84,45 @@ public class DetailMovieActivity extends AppCompatActivity
 
             buttonFavorite();
 
-            getSupportLoaderManager().initLoader(ID_TRAILER_LOADER, bundle, this);
+            LoaderManager.getInstance(this).initLoader(ID_TRAILER_LOADER, bundle, this);
+            //getSupportLoaderManager().initLoader(ID_TRAILER_LOADER, bundle, this);
+
+            getWindow().setSharedElementEnterTransition(TransitionInflater.from(this)
+                .inflateTransition(R.transition.curve));
+
+            animateViewsIn();
+            //animateSlideEnter();
+        }
+    }
+
+    private void animateSlideEnter() {
+        Slide slide = new Slide(Gravity.BOTTOM);
+        slide.addTarget(R.id.tv_synopsis);
+        slide.addTarget(R.id.rv_trailers);
+        slide.setInterpolator(AnimationUtils.loadInterpolator(this,
+                android.R.interpolator.linear_out_slow_in));
+        slide.setDuration(600);
+        getWindow().setEnterTransition(slide);
+    }
+
+    private void animateViewsIn() {
+        ViewGroup root = findViewById(R.id.root);
+        int count = root.getChildCount();
+        float offset = 300;
+        Interpolator interpolator = AnimationUtils.loadInterpolator(this, android.R.interpolator.linear_out_slow_in);
+
+        for (int i = 0; i < count; i++) {
+            View view = root.getChildAt(i);
+            view.setVisibility(View.VISIBLE);
+            view.setTranslationY(offset);
+            view.setAlpha(0.85f);
+            view.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setInterpolator(interpolator)
+                    .setDuration(3000)
+                    .start();
+            offset *= 1.5f;
         }
     }
 
@@ -94,7 +136,10 @@ public class DetailMovieActivity extends AppCompatActivity
     }
 
     private void buttonFavorite() {
-        mFavoriteButton = (Button) findViewById(R.id.bt_favorite);
+        mFavoriteButton = findViewById(R.id.img_favorite);
+        mEmptyStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_empty);
+        mFillStar = (AnimatedVectorDrawable) getDrawable(R.drawable.avd_star_fill);
+
         mFavoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +152,13 @@ public class DetailMovieActivity extends AppCompatActivity
         });
     }
 
+    private void animateStarFavorite() {
+        AnimatedVectorDrawable drawable = mFavorito ? mEmptyStar : mFillStar;
+        mFavoriteButton.setImageDrawable(drawable);
+        drawable.start();
+        mFavorito = !mFavorito;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.getMenuInflater().inflate(R.menu.detail, menu);
@@ -115,6 +167,10 @@ public class DetailMovieActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            supportFinishAfterTransition();
+            return true;
+        }
         if (item.getItemId() ==  R.id.action_reviews) {
             Intent reviewIntent = new Intent(this, ReviewActivity.class);
             reviewIntent.putExtra(EXTRA_MOVIE_ID, mMovie.id);
@@ -247,23 +303,24 @@ public class DetailMovieActivity extends AppCompatActivity
                         mMovie.releaseDate = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
                         mMovie.voteAverage = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_VOTE_AVERAGE));
                         mMovie.overview = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_OVERVIEW));*/
-                        mContext.get().mFavorito = true;
-                        mContext.get().mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
+                        mContext.get().animateStarFavorite();
+                        //mContext.get().mFavorito = true;
+                        //mContext.get().mFavoriteButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_yellow, 0, 0, 0);
                         ((Cursor) obj).close();
                     }
                     break;
                 case Action.INSERT:
                     if (obj instanceof Uri) {
-                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
-                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorYellow), PorterDuff.Mode.SRC_IN);
-                        mContext.get().mFavorito = true;
+                        //mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                          //      .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorYellow), PorterDuff.Mode.SRC_IN);
+                        mContext.get().animateStarFavorite();
                     }
                     break;
                 case Action.DELETE:
                     if (obj instanceof Integer && ((Integer) obj) > 0) {
-                        mContext.get().mFavoriteButton.getCompoundDrawables()[0]
-                                .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorWhite), PorterDuff.Mode.SRC_IN);
-                        mContext.get().mFavorito = false;
+                        //mContext.get().mFavoriteButton.getCompoundDrawables()[0]
+                          //      .setColorFilter(ContextCompat.getColor(mContext.get(), R.color.colorWhite), PorterDuff.Mode.SRC_IN);
+                        mContext.get().animateStarFavorite();
                     }
             }
         }

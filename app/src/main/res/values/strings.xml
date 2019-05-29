@@ -22,10 +22,14 @@
 
     <string name="title_fake">Jurassic World</string>
     <string name="date_fake">13/08/2017</string>
-    <string name="overview_fake">O Jurassic Park está aberto para visitação, e o público tem a chance de ver de perto diversas espécies de dinossauros. Porém, um desses animais, resultado de experiência genética, desenvolve alta inteligência e se torna uma ameaça para a humanidade.</string>
+    <string name="overview_fake">O Jurassic Park está aberto para visitação, e o público tem a chance 
+        de ver de perto diversas espécies de dinossauros. Porém, um desses animais, resultado de experiência 
+        genética, desenvolve alta inteligência e se torna uma ameaça para a humanidade.
+    </string>
     <string name="vote_average_fake">8.1/10</string>
     <string name="trailer_fake">Trailer 1</string>
     <string name="movie_detail">Movie Detail</string>
     <string name="movie_review">Reviews</string>
-
+    
+    <string name="transition_post" translatable="false">tran_post</string>
 </resources>
